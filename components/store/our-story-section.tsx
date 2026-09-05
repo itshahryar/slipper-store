@@ -1,16 +1,18 @@
 "use client";
 
-import { Play, Footprints, Lightbulb, Scale, Compass, Hammer } from "lucide-react";
+import { Footprints, Lightbulb, Scale, Compass, Hammer } from "lucide-react";
 
 interface OurStorySectionProps {
-  videoSrc?: string; // Optional video URL if provided in the future
+  videoSrc?: string;
 }
 
-export function OurStorySection({ videoSrc }: OurStorySectionProps) {
+export function OurStorySection({
+  videoSrc = "/story video/story_video.mp4",
+}: OurStorySectionProps) {
   return (
     <section className="w-full bg-card border-y py-10 sm:py-14 px-4 sm:px-8 relative overflow-hidden">
       <div className="container mx-auto max-w-7xl space-y-8">
-        {/* Top Header Row (Unchanged) */}
+        {/* Top Header Row */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-5 border-b">
           <div className="space-y-1.5 text-left flex-1">
             <span className="text-xs font-extrabold uppercase tracking-widest text-primary flex items-center gap-1.5">
@@ -23,7 +25,7 @@ export function OurStorySection({ videoSrc }: OurStorySectionProps) {
             </h2>
           </div>
 
-          {/* Golden Rule Quote Card (Highlighted in Yellow/Amber Accent) */}
+          {/* Golden Rule Quote Card */}
           <div className="p-3.5 border border-amber-500/20 rounded-xl bg-amber-500/5 border-l-4 border-l-amber-500 space-y-1 lg:max-w-md shrink-0 text-left shadow-xs">
             <span className="text-[11px] font-extrabold text-amber-500 uppercase tracking-widest block">
               Our Golden Rule
@@ -64,42 +66,18 @@ export function OurStorySection({ videoSrc }: OurStorySectionProps) {
             </div>
           </div>
 
-          {/* CENTER COLUMN: Brand Story Video Container */}
+          {/* CENTER COLUMN: Brand Story Video Container (Seamless Borderless) */}
           <div className="w-full">
-            <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-neutral-900 border border-neutral-800 shadow-xl group flex items-center justify-center">
-              {videoSrc ? (
-                <video
-                  src={videoSrc}
-                  controls
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <>
-                  {/* Decorative Dark Background Image & Overlay */}
-                  <div
-                    className="absolute inset-0 bg-cover bg-center opacity-40 group-hover:scale-105 transition-transform duration-700"
-                    style={{
-                      backgroundImage: `url('https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&q=80&w=1200')`,
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/20" />
-
-                  {/* Play Button & Label Placeholder */}
-                  <div className="relative z-10 flex flex-col items-center justify-center text-center space-y-2 p-5">
-                    <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-white/20 backdrop-blur-md text-white border border-white/40 flex items-center justify-center group-hover:bg-amber-400 group-hover:text-black group-hover:border-amber-400 transition-all shadow-lg cursor-pointer">
-                      <Play className="h-5 w-5 sm:h-6 sm:w-6 fill-current ml-0.5" />
-                    </div>
-                    <div>
-                      <span className="text-white font-extrabold text-xs block uppercase tracking-wider">
-                        Watch Our Craftsmanship
-                      </span>
-                      <span className="text-neutral-300 text-[10px] block">
-                        Brand Story Video Space
-                      </span>
-                    </div>
-                  </div>
-                </>
-              )}
+            <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-neutral-900 shadow-xl flex items-center justify-center">
+              <video
+                src={videoSrc}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="auto"
+                className="w-full h-full object-cover rounded-2xl"
+              />
             </div>
           </div>
 
