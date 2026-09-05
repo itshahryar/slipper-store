@@ -24,7 +24,7 @@ const SLIDES: SlideItem[] = [
     subtitle: "Handcrafted calfskin leather slippers & ergonomic slides.",
     ctaText: "SHOP LEATHER SLIPPERS",
     ctaLink: "/collections/men",
-    bgImage: "https://images.unsplash.com/photo-1582844245749-6fa6731995cb?auto=format&fit=crop&q=80&w=1600",
+    bgImage: "/banner images/1.jpeg",
   },
   {
     id: 2,
@@ -33,7 +33,7 @@ const SLIDES: SlideItem[] = [
     subtitle: "Ultra-soft indoor slippers designed for morning warmth.",
     ctaText: "SHOP WOMEN'S COLLECTION",
     ctaLink: "/collections/women",
-    bgImage: "https://images.unsplash.com/photo-1560769629-975ec94e6a86?auto=format&fit=crop&q=80&w=1600",
+    bgImage: "/banner images/2.jpeg",
   },
   {
     id: 3,
@@ -42,7 +42,7 @@ const SLIDES: SlideItem[] = [
     subtitle: "Authentic Peshawari chappals & handcrafted leather sandals.",
     ctaText: "SHOP PESHAWARI CHAPPAL",
     ctaLink: "/collections/men-peshawari",
-    bgImage: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&q=80&w=1600",
+    bgImage: "/banner images/3.jpeg",
   },
   {
     id: 4,
@@ -51,7 +51,7 @@ const SLIDES: SlideItem[] = [
     subtitle: "Natural beeswax polish & 100% horsehair shine brushes.",
     ctaText: "SHOP CARE KITS",
     ctaLink: "/collections/care-accessories",
-    bgImage: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&q=80&w=1600",
+    bgImage: "/banner images/4.jpeg",
   },
 ];
 
@@ -76,7 +76,7 @@ export function HeroSlider() {
 
   return (
     <div
-      className="relative w-full h-[380px] sm:h-[450px] lg:h-[480px] bg-neutral-900 overflow-hidden text-white group"
+      className="relative w-full h-[320px] sm:h-[420px] md:h-[480px] lg:h-[520px] bg-neutral-900 overflow-hidden text-white group"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -93,13 +93,13 @@ export function HeroSlider() {
             alt={slide.title}
             fill
             priority={idx === 0}
-            className="object-cover object-center opacity-65"
+            className="object-cover object-center opacity-80"
           />
-          {/* Gradient Overlay matching reference image typography placement */}
+          {/* Dark Gradient Overlay for optimal legibility */}
           <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
 
           {/* Slide Text Content */}
-          <div className="container mx-auto h-full px-6 sm:pl-24 lg:pl-28 sm:pr-12 flex flex-col justify-center max-w-7xl relative z-20 space-y-4">
+          <div className="container mx-auto h-full px-6 sm:pl-24 lg:pl-28 sm:pr-12 flex flex-col justify-center max-w-7xl relative z-20 space-y-3.5">
             <span className="inline-block text-xs sm:text-sm font-extrabold tracking-widest text-amber-400 uppercase">
               {slide.badge}
             </span>
@@ -117,7 +117,7 @@ export function HeroSlider() {
                 <Button
                   variant="outline"
                   size="default"
-                  className="h-10 sm:h-11 px-6 font-extrabold text-xs sm:text-sm uppercase tracking-widest border-2 border-white text-white bg-transparent hover:bg-white hover:text-black transition-all"
+                  className="h-10 sm:h-11 px-6 font-extrabold text-xs sm:text-sm uppercase tracking-widest border-2 border-white text-white bg-transparent hover:bg-white hover:text-black transition-all cursor-pointer"
                 >
                   {slide.ctaText}
                 </Button>
@@ -151,7 +151,7 @@ export function HeroSlider() {
           <button
             key={idx}
             onClick={() => setCurrentSlide(idx)}
-            className={`h-2 rounded-full transition-all ${
+            className={`h-2 rounded-full transition-all cursor-pointer ${
               idx === currentSlide
                 ? "w-7 bg-amber-400"
                 : "w-2 bg-white/50 hover:bg-white"
