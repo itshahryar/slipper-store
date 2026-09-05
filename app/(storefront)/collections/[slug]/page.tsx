@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ProductCard } from "@/components/store/product-card";
 import { CollectionSortSelect } from "@/components/store/collection-sort-select";
+import { CollectionProductGrid } from "@/components/store/collection-product-grid";
 import { SlidersHorizontal, ChevronRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -65,21 +65,28 @@ export default async function CollectionPage({ params, searchParams }: Collectio
   // Sort ordering
   let orderBy: any = { createdAt: "desc" };
   if (sort === "price-asc") {
-    orderBy = { variants: { _count: "asc" } }; // Fallback sort
+    orderBy = { basePrice: "asc" };
+  } else if (sort === "price-desc") {
+    orderBy = { basePrice: "desc" };
   } else if (sort === "name-asc") {
     orderBy = { name: "asc" };
   }
 
-  const products = await prisma.product.findMany({
-    where: whereClause,
-    include: {
-      subCategory: {
-        include: { category: true },
+  // Optimized Initial Load: Fetch only first 12 items + totalCount
+  const [totalCount, initialProducts] = await prisma.$transaction([
+    prisma.product.count({ where: whereClause }),
+    prisma.product.findMany({
+      where: whereClause,
+      include: {
+        subCategory: {
+          include: { category: true },
+        },
+        variants: true,
       },
-      variants: true,
-    },
-    orderBy,
-  });
+      orderBy,
+      take: 12,
+    }),
+  ]);
 
   return (
     <div className="space-y-8 pb-16">
@@ -129,41 +136,22 @@ export default async function CollectionPage({ params, searchParams }: Collectio
           </div>
 
           <div className="text-muted-foreground font-medium">
-            {products.length} {products.length === 1 ? "Product" : "Products"}
+            {totalCount} {totalCount === 1 ? "Product" : "Products"}
           </div>
 
           <CollectionSortSelect defaultValue={sort || "newest"} />
         </div>
       </div>
 
-      {/* Product Grid */}
+      {/* Paginated Product Grid with Load More (12 by 12) */}
       <div className="container mx-auto px-4 max-w-7xl">
-        {products.length === 0 ? (
-          <div className="text-center py-20 border rounded-2xl bg-card space-y-4">
-            <h3 className="text-lg font-bold">No products in this collection</h3>
-            <p className="text-sm text-muted-foreground max-w-md mx-auto">
-              Check back soon for new arrivals in {collectionTitle}, or explore our other collections.
-            </p>
-            <Link
-              href="/"
-              className="inline-block px-5 py-2.5 rounded-lg bg-primary text-primary-foreground font-bold text-xs uppercase tracking-wider"
-            >
-              Return to Storefront
-            </Link>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {products.map((product: any) => (
-              <ProductCard
-                key={product.id}
-                product={{
-                  ...product,
-                  category: product.subCategory?.name || "Footwear",
-                }}
-              />
-            ))}
-          </div>
-        )}
+        <CollectionProductGrid
+          initialProducts={initialProducts}
+          initialTotalCount={totalCount}
+          slug={slug}
+          sort={sort || "newest"}
+          collectionTitle={collectionTitle}
+        />
       </div>
     </div>
   );
