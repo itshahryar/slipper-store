@@ -3,11 +3,13 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createProductAction } from "@/app/actions/products";
+import { uploadImageAction } from "@/app/actions/upload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, Upload, Loader2 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 interface SubCategoryOption {
   id: string;
@@ -25,6 +27,7 @@ export default function CreateProductPage() {
   const [basePriceDollars, setBasePriceDollars] = useState<number>(99.99);
   const [isFeatured, setIsFeatured] = useState<boolean>(false);
   const [imageUrl, setImageUrl] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
 
   const [variants, setVariants] = useState<
     { size: string; color: string; sku: string; stock: number; priceDollars: number }[]
@@ -48,6 +51,29 @@ export default function CreateProductPage() {
       .catch(console.error);
   }, []);
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await uploadImageAction(formData);
+      if (res.url) {
+        setImageUrl(res.url);
+      } else if (res.error) {
+        alert(res.error);
+      }
+    } catch (err) {
+      console.error("Upload error:", err);
+      alert("Failed to upload image.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const addVariantRow = () => {
     setVariants((prev) => [
       ...prev,
@@ -59,10 +85,6 @@ export default function CreateProductPage() {
         priceDollars: basePriceDollars,
       },
     ]);
-  };
-
-  const removeVariantRow = (index: number) => {
-    setVariants((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -166,17 +188,53 @@ export default function CreateProductPage() {
               />
             </div>
 
-            <div className="space-y-1.5 sm:col-span-2">
-              <Label htmlFor="imageUrl">Product Image URL</Label>
-              <Input
-                id="imageUrl"
-                placeholder="https://images.unsplash.com/photo-..."
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-              />
+            {/* Cloudinary Image Upload */}
+            <div className="space-y-2 sm:col-span-2">
+              <Label>Product Image (Cloudinary)</Label>
+
+              <div className="flex flex-col sm:flex-row items-center gap-4">
+                <div className="flex-1 w-full space-y-1.5">
+                  <Input
+                    id="imageUrl"
+                    placeholder="https://res.cloudinary.com/... or paste image URL"
+                    value={imageUrl}
+                    onChange={(e) => setImageUrl(e.target.value)}
+                  />
+                </div>
+
+                <div className="shrink-0 w-full sm:w-auto">
+                  <Label htmlFor="cloudinary-upload" className="cursor-pointer">
+                    <div className="flex items-center justify-center gap-2 h-10 px-4 rounded-md border bg-muted hover:bg-muted/80 text-xs font-bold transition-colors">
+                      {isUploading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin text-primary" /> Uploading...
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="h-4 w-4 text-primary" /> Upload to Cloudinary
+                        </>
+                      )}
+                    </div>
+                  </Label>
+                  <input
+                    id="cloudinary-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                    disabled={isUploading}
+                  />
+                </div>
+              </div>
+
+              {imageUrl && (
+                <div className="relative h-28 w-28 rounded-lg overflow-hidden border bg-muted mt-2">
+                  <Image src={imageUrl} alt="Uploaded product preview" fill className="object-cover" />
+                </div>
+              )}
             </div>
 
-            <div className="flex items-center gap-2 pt-2">
+            <div className="flex items-center gap-2 pt-2 sm:col-span-2">
               <input
                 type="checkbox"
                 id="isFeatured"
@@ -276,7 +334,7 @@ export default function CreateProductPage() {
           <Link href="/admin/products">
             <Button type="button" variant="outline">Cancel</Button>
           </Link>
-          <Button type="submit" disabled={isSubmitting} className="font-bold">
+          <Button type="submit" disabled={isSubmitting || isUploading} className="font-bold">
             {isSubmitting ? "Creating..." : "Save Product & Variants"}
           </Button>
         </div>
