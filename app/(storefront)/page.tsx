@@ -1,23 +1,15 @@
 import { prisma } from "@/lib/prisma";
 import { ProductCard } from "@/components/store/product-card";
+import { HeroSlider } from "@/components/store/hero-slider";
 import Link from "next/link";
-import { Footprints, Sparkles, ShieldCheck, HeartHandshake } from "lucide-react";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
-interface HomePageProps {
-  searchParams: Promise<{
-    subcategory?: string;
-    search?: string;
-  }>;
-}
-
-export default async function StorefrontHomePage({ searchParams }: HomePageProps) {
-  const params = await searchParams;
-  const selectedSubCategorySlug = params.subcategory;
-  const searchQuery = params.search;
-
-  // 1. Fetch active categories and subcategories from DB
+export default async function StorefrontHomePage() {
+  // 1. Fetch active categories for visual category grid
   const categories = await prisma.category.findMany({
     where: { isActive: true },
     include: {
@@ -25,135 +17,145 @@ export default async function StorefrontHomePage({ searchParams }: HomePageProps
         where: { isActive: true },
       },
     },
-    orderBy: { name: "asc" },
   });
 
-  const allSubcategories = categories.flatMap((c) => c.subcategories);
-
-  // 2. Build where filter for products
-  const whereClause: any = { isActive: true };
-
-  if (selectedSubCategorySlug) {
-    const subCat = allSubcategories.find((s) => s.slug === selectedSubCategorySlug);
-    if (subCat) {
-      whereClause.subCategoryId = subCat.id;
-    }
-  }
-
-  if (searchQuery) {
-    whereClause.OR = [
-      { name: { contains: searchQuery, mode: "insensitive" } },
-      { description: { contains: searchQuery, mode: "insensitive" } },
-    ];
-  }
-
-  const products = await prisma.product.findMany({
-    where: whereClause,
+  // 2. Fetch featured products for bestsellers section
+  const featuredProducts = await prisma.product.findMany({
+    where: { isActive: true, isFeatured: true },
     include: {
       subCategory: true,
       variants: true,
     },
-    orderBy: {
-      isFeatured: "desc",
-    },
+    take: 4,
   });
 
   return (
-    <div className="space-y-12 pb-16">
-      {/* Single Category Hero Banner */}
-      <section className="relative bg-gradient-to-b from-primary/10 via-background to-background py-16 px-4 border-b overflow-hidden">
-        <div className="container mx-auto max-w-5xl text-center space-y-6 relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold">
-            <Sparkles className="h-3.5 w-3.5" /> Handcrafted Footwear Specialist
-          </div>
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-foreground max-w-3xl mx-auto leading-tight">
-            Exceptional Slippers & Footwear Care, Crafted for Unmatched Comfort.
-          </h1>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Explore our hand-curated selection of calfskin leather slippers, plush shearling home slides, and professional care kits. Delivered straight to your door with <strong>Cash on Delivery (COD)</strong>.
-          </p>
+    <div className="space-y-16 pb-16">
+      {/* Luxury Hero Slider (Replaces static text banner) */}
+      <HeroSlider />
 
-          <div className="pt-4 flex flex-wrap items-center justify-center gap-8 text-xs font-medium text-muted-foreground border-t border-border/50 max-w-xl mx-auto">
-            <div className="flex items-center gap-2">
-              <Footprints className="h-4 w-4 text-primary" /> Premium Leather & Shearling
+      {/* Category Showcase Grid (Havaianas Visual Style) */}
+      <section className="container mx-auto px-4 max-w-7xl space-y-8">
+        <div className="text-center space-y-2">
+          <h2 className="text-3xl font-extrabold tracking-tight uppercase">Explore Collections</h2>
+          <p className="text-muted-foreground text-sm">Choose your category to view specialized slipper styles</p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* WOMEN Category Card */}
+          <Link
+            href="/collections/women"
+            className="group relative h-96 rounded-2xl overflow-hidden border shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 bg-neutral-900"
+          >
+            <Image
+              src="https://images.unsplash.com/photo-1560769629-975ec94e6a86?auto=format&fit=crop&q=80&w=600"
+              alt="Women Slippers"
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-500 opacity-80 group-hover:opacity-90"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-end p-6 text-white space-y-2">
+              <span className="text-xs font-bold uppercase tracking-widest text-amber-400">For Her</span>
+              <h3 className="text-2xl font-extrabold tracking-tight uppercase">WOMEN</h3>
+              <p className="text-xs text-neutral-300">Plush home slippers & comfort slides</p>
+              <div className="pt-2 font-bold text-xs flex items-center gap-1 text-white group-hover:underline">
+                Explore Collection <ArrowRight className="h-4 w-4" />
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4 text-primary" /> 100% Quality Guaranteed
+          </Link>
+
+          {/* MEN Category Card */}
+          <Link
+            href="/collections/men"
+            className="group relative h-96 rounded-2xl overflow-hidden border shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 bg-neutral-900"
+          >
+            <Image
+              src="https://images.unsplash.com/photo-1582844245749-6fa6731995cb?auto=format&fit=crop&q=80&w=600"
+              alt="Men Slippers"
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-500 opacity-80 group-hover:opacity-90"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-end p-6 text-white space-y-2">
+              <span className="text-xs font-bold uppercase tracking-widest text-amber-400">For Him</span>
+              <h3 className="text-2xl font-extrabold tracking-tight uppercase">MEN</h3>
+              <p className="text-xs text-neutral-300">Italian leather slippers & Peshawari</p>
+              <div className="pt-2 font-bold text-xs flex items-center gap-1 text-white group-hover:underline">
+                Explore Collection <ArrowRight className="h-4 w-4" />
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <HeartHandshake className="h-4 w-4 text-primary" /> No Card Needed (COD Only)
+          </Link>
+
+          {/* KIDS Category Card */}
+          <Link
+            href="/collections/kids"
+            className="group relative h-96 rounded-2xl overflow-hidden border shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 bg-neutral-900"
+          >
+            <Image
+              src="https://images.unsplash.com/photo-1603808033192-082d6919d3e1?auto=format&fit=crop&q=80&w=600"
+              alt="Kids Slippers"
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-500 opacity-80 group-hover:opacity-90"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-end p-6 text-white space-y-2">
+              <span className="text-xs font-bold uppercase tracking-widest text-amber-400">Little Feet</span>
+              <h3 className="text-2xl font-extrabold tracking-tight uppercase">KIDS</h3>
+              <p className="text-xs text-neutral-300">Fun slides & cushioned house shoes</p>
+              <div className="pt-2 font-bold text-xs flex items-center gap-1 text-white group-hover:underline">
+                Explore Collection <ArrowRight className="h-4 w-4" />
+              </div>
             </div>
-          </div>
+          </Link>
+
+          {/* CARE & ACCESSORIES Card */}
+          <Link
+            href="/collections/care-accessories"
+            className="group relative h-96 rounded-2xl overflow-hidden border shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 bg-neutral-900"
+          >
+            <Image
+              src="https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&q=80&w=600"
+              alt="Care & Polish"
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-500 opacity-80 group-hover:opacity-90"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-end p-6 text-white space-y-2">
+              <span className="text-xs font-bold uppercase tracking-widest text-amber-400">Care Kits</span>
+              <h3 className="text-2xl font-extrabold tracking-tight uppercase">CARE & POLISH</h3>
+              <p className="text-xs text-neutral-300">Natural polish & horsehair shine brushes</p>
+              <div className="pt-2 font-bold text-xs flex items-center gap-1 text-white group-hover:underline">
+                Explore Collection <ArrowRight className="h-4 w-4" />
+              </div>
+            </div>
+          </Link>
         </div>
       </section>
 
-      {/* Dynamic Category Filter Pills & Catalog */}
-      <section className="container mx-auto px-4 space-y-8">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b pb-6">
-          <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-none">
-            <Link
-              href="/"
-              className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${
-                !selectedSubCategorySlug
-                  ? "bg-primary text-primary-foreground shadow-xs"
-                  : "bg-muted hover:bg-muted/80 text-muted-foreground"
-              }`}
-            >
-              All Items
-            </Link>
-
-            {allSubcategories.map((subCat) => {
-              const isActive = selectedSubCategorySlug === subCat.slug;
-              return (
-                <Link
-                  key={subCat.id}
-                  href={`/?subcategory=${subCat.slug}`}
-                  className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${
-                    isActive
-                      ? "bg-primary text-primary-foreground shadow-xs"
-                      : "bg-muted hover:bg-muted/80 text-muted-foreground"
-                  }`}
-                >
-                  {subCat.name}
-                </Link>
-              );
-            })}
-          </div>
-
-          <span className="text-xs text-muted-foreground font-medium shrink-0">
-            Showing {products.length} {products.length === 1 ? "product" : "products"}
-          </span>
-        </div>
-
-        {/* Product Grid */}
-        {products.length === 0 ? (
-          <div className="text-center py-20 border rounded-xl bg-card space-y-4">
-            <Footprints className="h-12 w-12 stroke-1 mx-auto text-muted-foreground" />
-            <h3 className="text-lg font-semibold">No products found</h3>
-            <p className="text-sm text-muted-foreground max-w-md mx-auto">
-              There are no active products in this category. Try selecting another subcategory filter.
-            </p>
-            <Link
-              href="/"
-              className="inline-block px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold"
-            >
-              View All Products
+      {/* Featured Bestsellers Section */}
+      {featuredProducts.length > 0 && (
+        <section className="container mx-auto px-4 max-w-7xl space-y-8 border-t pt-12">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <h2 className="text-3xl font-extrabold tracking-tight uppercase">Bestselling Slippers</h2>
+              <p className="text-sm text-muted-foreground">Hand-selected customer favorites</p>
+            </div>
+            <Link href="/collections/all">
+              <Button variant="outline" className="font-bold text-xs uppercase tracking-wider gap-1">
+                View All Slippers &rarr;
+              </Button>
             </Link>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {products.map((product: any) => (
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {featuredProducts.map((product: any) => (
               <ProductCard
                 key={product.id}
                 product={{
                   ...product,
-                  category: product.subCategory?.name || "General",
+                  category: product.subCategory?.name || "Footwear",
                 }}
               />
             ))}
           </div>
-        )}
-      </section>
+        </section>
+      )}
     </div>
   );
 }

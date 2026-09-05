@@ -55,25 +55,25 @@ export function StoreFooter() {
           </div>
 
           <div>
-            <h5 className="font-semibold text-sm mb-3">Categories</h5>
+            <h5 className="font-semibold text-sm mb-3">Featured Collections</h5>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                <Link href="/?subcategory=leather-slippers" className="hover:text-foreground">
-                  Leather Slippers
+                <Link href="/collections/women" className="hover:text-foreground">
+                  Women's Collection
                 </Link>
               </li>
               <li>
-                <Link href="/?subcategory=plush-home-slippers" className="hover:text-foreground">
-                  Plush Home Slippers
+                <Link href="/collections/men" className="hover:text-foreground">
+                  Men's Collection
                 </Link>
               </li>
               <li>
-                <Link href="/?subcategory=slide-sandals" className="hover:text-foreground">
-                  Slide Sandals
+                <Link href="/collections/kids" className="hover:text-foreground">
+                  Kids Collection
                 </Link>
               </li>
               <li>
-                <Link href="/?subcategory=polish-care-kits" className="hover:text-foreground">
+                <Link href="/collections/care-accessories" className="hover:text-foreground">
                   Care & Polish Kits
                 </Link>
               </li>
