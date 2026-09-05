@@ -1,9 +1,8 @@
 import { prisma } from "@/lib/prisma";
-import { ProductCard } from "@/components/store/product-card";
 import { HeroSlider } from "@/components/store/hero-slider";
+import { BestsellerSection } from "@/components/store/bestseller-section";
 import Link from "next/link";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -26,12 +25,12 @@ export default async function StorefrontHomePage() {
       subCategory: true,
       variants: true,
     },
-    take: 4,
+    take: 6,
   });
 
   return (
     <div className="space-y-16 pb-16">
-      {/* Luxury Hero Slider (Replaces static text banner) */}
+      {/* Luxury Hero Slider */}
       <HeroSlider />
 
       {/* Category Showcase Grid (Havaianas Visual Style) */}
@@ -128,34 +127,8 @@ export default async function StorefrontHomePage() {
         </div>
       </section>
 
-      {/* Featured Bestsellers Section */}
-      {featuredProducts.length > 0 && (
-        <section className="container mx-auto px-4 max-w-7xl space-y-8 border-t pt-12">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div>
-              <h2 className="text-3xl font-extrabold tracking-tight uppercase">Bestselling Slippers</h2>
-              <p className="text-sm text-muted-foreground">Hand-selected customer favorites</p>
-            </div>
-            <Link href="/collections/all">
-              <Button variant="outline" className="font-bold text-xs uppercase tracking-wider gap-1">
-                View All Slippers &rarr;
-              </Button>
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredProducts.map((product: any) => (
-              <ProductCard
-                key={product.id}
-                product={{
-                  ...product,
-                  category: product.subCategory?.name || "Footwear",
-                }}
-              />
-            ))}
-          </div>
-        </section>
-      )}
+      {/* Luxury Ready-To-Wear / Bestseller Section (Reference Image Layout) */}
+      <BestsellerSection products={featuredProducts} />
     </div>
   );
 }

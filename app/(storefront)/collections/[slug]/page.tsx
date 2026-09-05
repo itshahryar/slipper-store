@@ -20,41 +20,52 @@ export default async function CollectionPage({ params, searchParams }: Collectio
   const { slug } = await params;
   const { sort } = await searchParams;
 
-  // 1. Try finding parent Category by slug first
-  let category = await prisma.category.findUnique({
-    where: { slug },
-    include: { subcategories: true },
-  });
-
+  let category = null;
   let subCategory = null;
+  let collectionTitle = "";
+  let parentCategoryTitle = null;
 
-  // 2. If not a parent Category, try finding SubCategory by slug
-  if (!category) {
-    subCategory = await prisma.subCategory.findUnique({
-      where: { slug },
-      include: { category: true },
-    });
-  }
-
-  if (!category && !subCategory) {
-    notFound();
-  }
-
-  // 3. Build product query filter
   const whereClause: any = { isActive: true };
 
-  if (category) {
-    whereClause.subCategory = { categoryId: category.id };
-  } else if (subCategory) {
-    whereClause.subCategoryId = subCategory.id;
+  // Special Collection Routes: "bestsellers" or "all"
+  if (slug === "bestsellers") {
+    collectionTitle = "Bestselling Slippers";
+    whereClause.isFeatured = true;
+  } else if (slug === "all") {
+    collectionTitle = "All Slippers & Care Products";
+  } else {
+    // Try finding parent Category by slug first
+    category = await prisma.category.findUnique({
+      where: { slug },
+      include: { subcategories: true },
+    });
+
+    // If not a parent Category, try finding SubCategory by slug
+    if (!category) {
+      subCategory = await prisma.subCategory.findUnique({
+        where: { slug },
+        include: { category: true },
+      });
+    }
+
+    if (!category && !subCategory) {
+      notFound();
+    }
+
+    if (category) {
+      whereClause.subCategory = { categoryId: category.id };
+      collectionTitle = category.name;
+    } else if (subCategory) {
+      whereClause.subCategoryId = subCategory.id;
+      collectionTitle = subCategory.name;
+      parentCategoryTitle = subCategory.category.name;
+    }
   }
 
-  // 4. Build sort order
+  // Sort ordering
   let orderBy: any = { createdAt: "desc" };
   if (sort === "price-asc") {
-    orderBy = { basePrice: "asc" };
-  } else if (sort === "price-desc") {
-    orderBy = { basePrice: "desc" };
+    orderBy = { variants: { _count: "asc" } }; // Fallback sort
   } else if (sort === "name-asc") {
     orderBy = { name: "asc" };
   }
@@ -70,9 +81,6 @@ export default async function CollectionPage({ params, searchParams }: Collectio
     orderBy,
   });
 
-  const collectionTitle = category ? category.name : subCategory ? subCategory.name : "Collection";
-  const parentCategoryTitle = subCategory ? subCategory.category.name : null;
-
   return (
     <div className="space-y-8 pb-16">
       {/* Breadcrumb Header */}
@@ -80,7 +88,7 @@ export default async function CollectionPage({ params, searchParams }: Collectio
         <div className="container mx-auto max-w-7xl flex items-center gap-2 text-xs text-muted-foreground">
           <Link href="/" className="hover:text-foreground">Home</Link>
           <ChevronRight className="h-3 w-3" />
-          <Link href="/" className="hover:text-foreground">Collections</Link>
+          <Link href="/collections/all" className="hover:text-foreground">Collections</Link>
           {parentCategoryTitle && (
             <>
               <ChevronRight className="h-3 w-3" />

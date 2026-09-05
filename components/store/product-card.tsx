@@ -44,14 +44,22 @@ export function ProductCard({ product }: { product: ProductWithVariants }) {
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           className="object-cover group-hover:scale-105 transition-transform duration-300"
         />
-        <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
+
+        {/* Top Left: Category Badge */}
+        <div className="absolute top-3 left-3">
           <Badge variant="secondary" className="bg-background/90 backdrop-blur-xs text-xs font-semibold">
             {product.category}
           </Badge>
-          {product.isFeatured && (
-            <Badge className="bg-amber-500 text-white font-bold text-xs">Featured</Badge>
-          )}
         </div>
+
+        {/* Top Right: Featured Badge */}
+        {product.isFeatured && (
+          <div className="absolute top-3 right-3">
+            <Badge className="bg-amber-500 text-white font-bold text-xs shadow-xs">
+              Featured
+            </Badge>
+          </div>
+        )}
 
         {totalStock === 0 && (
           <div className="absolute inset-0 bg-background/80 backdrop-blur-xs flex items-center justify-center">

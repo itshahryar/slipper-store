@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Trash2, Plus } from "lucide-react";
+import { DeleteProductButton } from "@/components/admin/delete-product-button";
 import {
   updateProductAction,
-  deleteProductAction,
   addVariantAction,
   deleteVariantAction,
 } from "@/app/actions/products";
@@ -33,6 +33,7 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
   const product = await prisma.product.findUnique({
     where: { id },
     include: {
+      subCategory: true,
       variants: true,
     },
   });
@@ -41,30 +42,28 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
     notFound();
   }
 
+  const subCategories = await prisma.subCategory.findMany({
+    where: { isActive: true },
+    include: { category: true },
+    orderBy: { name: "asc" },
+  });
+
   async function handleUpdateProduct(formData: FormData) {
     "use server";
     const name = formData.get("name") as string;
     const description = formData.get("description") as string;
-    const category = formData.get("category") as any;
-    const basePrice = parseFloat(formData.get("basePrice") as string) || 0;
+    const subCategoryId = formData.get("subCategoryId") as string;
     const isFeatured = formData.get("isFeatured") === "on";
     const image1 = formData.get("image1") as string;
 
     await updateProductAction(id, {
       name,
       description,
-      category,
-      basePrice,
+      subCategoryId,
       isFeatured,
       images: [image1].filter(Boolean),
     });
 
-    redirect("/admin/products");
-  }
-
-  async function handleDeleteProduct() {
-    "use server";
-    await deleteProductAction(id);
     redirect("/admin/products");
   }
 
@@ -74,14 +73,14 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
     const color = formData.get("color") as string;
     const sku = (formData.get("sku") as string) || `SKU-${Date.now()}`;
     const stock = parseInt(formData.get("stock") as string) || 0;
-    const price = parseFloat(formData.get("price") as string) || undefined;
+    const priceDollars = parseFloat(formData.get("price") as string) || 0;
 
     await addVariantAction(id, {
       size,
       color,
       sku,
       stock,
-      price,
+      price: Math.round(priceDollars * 100),
     });
   }
 
@@ -96,11 +95,8 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
           <p className="text-xs text-muted-foreground font-mono">ID: {product.id} | Slug: /{product.slug}</p>
         </div>
 
-        <form action={handleDeleteProduct}>
-          <Button variant="destructive" size="sm" className="gap-1.5 text-xs font-semibold">
-            <Trash2 className="h-3.5 w-3.5" /> Delete Product
-          </Button>
-        </form>
+        {/* Delete Product Button with Shared ConfirmModal */}
+        <DeleteProductButton productId={product.id} productName={product.name} />
       </div>
 
       {/* Main Details Form */}
@@ -114,30 +110,19 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="category">Category</Label>
+            <Label htmlFor="subCategoryId">Subcategory</Label>
             <select
-              id="category"
-              name="category"
-              defaultValue={product.category}
+              id="subCategoryId"
+              name="subCategoryId"
+              defaultValue={product.subCategoryId}
               className="w-full h-10 px-3 rounded-md border bg-background text-sm font-medium"
             >
-              <option value="LEATHER_SLIPPERS">Leather Slippers</option>
-              <option value="PLUSH_HOME_SLIPPERS">Plush Home Slippers</option>
-              <option value="SLIDE_SANDALS">Slide Sandals</option>
-              <option value="CARE_AND_POLISH">Care & Polish</option>
+              {subCategories.map((sub) => (
+                <option key={sub.id} value={sub.id}>
+                  {sub.category.name} → {sub.name}
+                </option>
+              ))}
             </select>
-          </div>
-
-          <div className="space-y-1.5">
-            <Label htmlFor="basePrice">Base Price ($)</Label>
-            <Input
-              id="basePrice"
-              name="basePrice"
-              type="number"
-              step="0.01"
-              defaultValue={product.basePrice}
-              required
-            />
           </div>
 
           <div className="space-y-1.5 sm:col-span-2">
@@ -208,7 +193,7 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
                   <td className="px-4 py-3 font-mono text-xs">{v.sku}</td>
                   <td className="px-4 py-3 font-bold">{v.stock} units</td>
                   <td className="px-4 py-3 font-semibold">
-                    {formatCurrency(v.price ?? product.basePrice)}
+                    {formatCurrency(v.price)}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <form
