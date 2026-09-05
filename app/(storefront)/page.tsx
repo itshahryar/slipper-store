@@ -70,7 +70,7 @@ export default async function StorefrontHomePage({ searchParams }: HomePageProps
             Exceptional Slippers & Footwear Care, Crafted for Unmatched Comfort.
           </h1>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Explore our admin-curated selection of calfskin leather slippers, plush shearling home slides, and professional care kits. Delivered straight to your door with <strong>Cash on Delivery (COD)</strong>.
+            Explore our hand-curated selection of calfskin leather slippers, plush shearling home slides, and professional care kits. Delivered straight to your door with <strong>Cash on Delivery (COD)</strong>.
           </p>
 
           <div className="pt-4 flex flex-wrap items-center justify-center gap-8 text-xs font-medium text-muted-foreground border-t border-border/50 max-w-xl mx-auto">

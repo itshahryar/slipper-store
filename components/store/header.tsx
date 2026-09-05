@@ -87,12 +87,6 @@ export function StoreHeader() {
               </span>
             )}
           </Button>
-
-          <Link href="/admin/login">
-            <Button variant="ghost" size="sm" className="text-xs text-muted-foreground">
-              Admin
-            </Button>
-          </Link>
         </div>
       </div>
     </header>

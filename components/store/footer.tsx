@@ -58,22 +58,22 @@ export function StoreFooter() {
             <h5 className="font-semibold text-sm mb-3">Categories</h5>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                <Link href="/?category=LEATHER_SLIPPERS" className="hover:text-foreground">
+                <Link href="/?subcategory=leather-slippers" className="hover:text-foreground">
                   Leather Slippers
                 </Link>
               </li>
               <li>
-                <Link href="/?category=PLUSH_HOME_SLIPPERS" className="hover:text-foreground">
+                <Link href="/?subcategory=plush-home-slippers" className="hover:text-foreground">
                   Plush Home Slippers
                 </Link>
               </li>
               <li>
-                <Link href="/?category=SLIDE_SANDALS" className="hover:text-foreground">
+                <Link href="/?subcategory=slide-sandals" className="hover:text-foreground">
                   Slide Sandals
                 </Link>
               </li>
               <li>
-                <Link href="/?category=CARE_AND_POLISH" className="hover:text-foreground">
+                <Link href="/?subcategory=polish-care-kits" className="hover:text-foreground">
                   Care & Polish Kits
                 </Link>
               </li>
@@ -86,11 +86,6 @@ export function StoreFooter() {
               <li>Payment: Cash on Delivery (COD)</li>
               <li>Shipping: 2-4 Business Days</li>
               <li>Support Email: support@slipperstore.com</li>
-              <li>
-                <Link href="/admin/login" className="hover:text-foreground text-xs underline">
-                  Admin Login
-                </Link>
-              </li>
             </ul>
           </div>
         </div>
