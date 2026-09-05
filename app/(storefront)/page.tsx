@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { HeroSlider } from "@/components/store/hero-slider";
 import { BestsellerSection } from "@/components/store/bestseller-section";
+import { OurStorySection } from "@/components/store/our-story-section";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
@@ -33,7 +34,7 @@ export default async function StorefrontHomePage() {
       {/* Luxury Hero Slider */}
       <HeroSlider />
 
-      {/* Category Showcase Grid (Havaianas Visual Style) */}
+      {/* Category Showcase Grid */}
       <section className="container mx-auto px-4 max-w-7xl space-y-8">
         <div className="text-center space-y-2">
           <h2 className="text-3xl font-extrabold tracking-tight uppercase">Explore Collections</h2>
@@ -127,8 +128,11 @@ export default async function StorefrontHomePage() {
         </div>
       </section>
 
-      {/* Luxury Ready-To-Wear / Bestseller Section (Reference Image Layout) */}
+      {/* Luxury Ready-To-Wear / Bestseller Section */}
       <BestsellerSection products={featuredProducts} />
+
+      {/* Brand Story Section with Video Container (Positioned at the end) */}
+      <OurStorySection />
     </div>
   );
 }
