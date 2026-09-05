@@ -23,15 +23,15 @@ export function OurStorySection({ videoSrc }: OurStorySectionProps) {
             </h2>
           </div>
 
-          {/* Golden Rule Quote Card (Positioned at the end of the heading row) */}
-          <div className="p-3.5 border rounded-xl bg-muted/30 border-l-4 border-l-primary space-y-1 lg:max-w-md shrink-0 text-left shadow-xs">
-            <span className="text-[11px] font-bold text-primary uppercase tracking-widest block">
+          {/* Golden Rule Quote Card (Highlighted in Yellow/Amber Accent) */}
+          <div className="p-3.5 border border-amber-500/20 rounded-xl bg-amber-500/5 border-l-4 border-l-amber-500 space-y-1 lg:max-w-md shrink-0 text-left shadow-xs">
+            <span className="text-[11px] font-extrabold text-amber-500 uppercase tracking-widest block">
               Our Golden Rule
             </span>
             <p className="text-xs sm:text-sm font-extrabold text-foreground italic">
               &ldquo;Would I be proud to have this on my own feet?&rdquo;
             </p>
-            <p className="text-[11px] text-muted-foreground font-semibold">
+            <p className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold">
               If the answer&apos;s yes, it earns its place in our store. If not, it doesn&apos;t.
             </p>
           </div>
