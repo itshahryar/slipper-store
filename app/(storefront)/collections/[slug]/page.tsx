@@ -1,9 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { CollectionSortSelect } from "@/components/store/collection-sort-select";
 import { CollectionProductGrid } from "@/components/store/collection-product-grid";
-import { SlidersHorizontal, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +23,7 @@ export default async function CollectionPage({ params, searchParams }: Collectio
   let subCategory = null;
   let collectionTitle = "";
   let parentCategoryTitle = null;
+  let availableSubcategories: { id: string; name: string; slug: string }[] = [];
 
   const whereClause: any = { isActive: true };
 
@@ -37,7 +37,12 @@ export default async function CollectionPage({ params, searchParams }: Collectio
     // Try finding parent Category by slug first
     category = await prisma.category.findUnique({
       where: { slug },
-      include: { subcategories: true },
+      include: {
+        subcategories: {
+          where: { isActive: true },
+          select: { id: true, name: true, slug: true },
+        },
+      },
     });
 
     // If not a parent Category, try finding SubCategory by slug
@@ -55,6 +60,7 @@ export default async function CollectionPage({ params, searchParams }: Collectio
     if (category) {
       whereClause.subCategory = { categoryId: category.id };
       collectionTitle = category.name;
+      availableSubcategories = category.subcategories;
     } else if (subCategory) {
       whereClause.subCategoryId = subCategory.id;
       collectionTitle = subCategory.name;
@@ -65,9 +71,7 @@ export default async function CollectionPage({ params, searchParams }: Collectio
   // Sort ordering
   let orderBy: any = { createdAt: "desc" };
   if (sort === "price-asc") {
-    orderBy = { basePrice: "asc" };
-  } else if (sort === "price-desc") {
-    orderBy = { basePrice: "desc" };
+    orderBy = { createdAt: "asc" };
   } else if (sort === "name-asc") {
     orderBy = { name: "asc" };
   }
@@ -114,7 +118,7 @@ export default async function CollectionPage({ params, searchParams }: Collectio
         </h1>
         {category && category.subcategories.length > 0 && (
           <div className="flex flex-wrap items-center gap-2 pt-2">
-            {category.subcategories.map((sub) => (
+            {category.subcategories.map((sub: any) => (
               <Link
                 key={sub.id}
                 href={`/collections/${sub.slug}`}
@@ -127,23 +131,7 @@ export default async function CollectionPage({ params, searchParams }: Collectio
         )}
       </div>
 
-      {/* Servis-Style Filter & Sorting Bar */}
-      <div className="bg-muted/40 border-y py-3.5 px-4">
-        <div className="container mx-auto max-w-7xl flex flex-wrap items-center justify-between gap-4 text-xs font-bold text-foreground">
-          <div className="flex items-center gap-2">
-            <SlidersHorizontal className="h-4 w-4 text-primary" />
-            <span className="uppercase tracking-wider">Show Filters</span>
-          </div>
-
-          <div className="text-muted-foreground font-medium">
-            {totalCount} {totalCount === 1 ? "Product" : "Products"}
-          </div>
-
-          <CollectionSortSelect defaultValue={sort || "newest"} />
-        </div>
-      </div>
-
-      {/* Paginated Product Grid with Load More (12 by 12) */}
+      {/* Paginated Product Grid with Interactive Client API Filter Drawer */}
       <div className="container mx-auto px-4 max-w-7xl">
         <CollectionProductGrid
           initialProducts={initialProducts}
@@ -151,6 +139,7 @@ export default async function CollectionPage({ params, searchParams }: Collectio
           slug={slug}
           sort={sort || "newest"}
           collectionTitle={collectionTitle}
+          subCategories={availableSubcategories}
         />
       </div>
     </div>

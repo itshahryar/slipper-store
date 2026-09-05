@@ -3,15 +3,25 @@
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { ArrowUpDown } from "lucide-react";
 
-export function CollectionSortSelect({ defaultValue }: { defaultValue: string }) {
+interface CollectionSortSelectProps {
+  defaultValue: string;
+  onChange?: (value: string) => void;
+}
+
+export function CollectionSortSelect({ defaultValue, onChange }: CollectionSortSelectProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("sort", e.target.value);
-    router.push(`${pathname}?${params.toString()}`);
+    const value = e.target.value;
+    if (onChange) {
+      onChange(value);
+    } else {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("sort", value);
+      router.push(`${pathname}?${params.toString()}`);
+    }
   };
 
   return (
