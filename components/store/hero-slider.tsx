@@ -67,10 +67,10 @@ export function HeroSlider() {
     setCurrentSlide((prev) => (prev - 1 + SLIDES.length) % SLIDES.length);
   }, []);
 
-  // Auto advance slide every 5 seconds
+  // Auto advance slide every 4 seconds
   useEffect(() => {
     if (isPaused) return;
-    const interval = setInterval(nextSlide, 5000);
+    const interval = setInterval(nextSlide, 4000);
     return () => clearInterval(interval);
   }, [nextSlide, isPaused]);
 
