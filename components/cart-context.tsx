@@ -17,8 +17,8 @@ export interface CartItem {
 interface CartContextType {
   items: CartItem[];
   addToCart: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
-  removeFromCart: (variantId: string) => void;
-  updateQuantity: (variantId: string, quantity: number) => void;
+  removeFromCart: (variantId: string, variantInfo?: string) => void;
+  updateQuantity: (variantId: string, quantity: number, variantInfo?: string) => void;
   clearCart: () => void;
   subtotal: number;
   totalItems: number;
@@ -60,10 +60,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [items, isLoaded]);
 
+  // Strict variant matching: exact same productId + variantId + variantInfo (size & color)
   const addToCart = (newItem: Omit<CartItem, "quantity">, quantity = 1) => {
     setItems((prevItems) => {
       const existingIndex = prevItems.findIndex(
-        (i) => i.variantId === newItem.variantId
+        (i) =>
+          i.productId === newItem.productId &&
+          i.variantId === newItem.variantId &&
+          i.variantInfo === newItem.variantInfo
       );
 
       if (existingIndex > -1) {
@@ -82,21 +86,32 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setIsCartOpen(true);
   };
 
-  const removeFromCart = (variantId: string) => {
-    setItems((prev) => prev.filter((item) => item.variantId !== variantId));
+  const removeFromCart = (variantId: string, variantInfo?: string) => {
+    setItems((prev) =>
+      prev.filter((item) => {
+        if (variantInfo) {
+          return !(item.variantId === variantId && item.variantInfo === variantInfo);
+        }
+        return item.variantId !== variantId;
+      })
+    );
   };
 
-  const updateQuantity = (variantId: string, quantity: number) => {
+  const updateQuantity = (variantId: string, quantity: number, variantInfo?: string) => {
     if (quantity <= 0) {
-      removeFromCart(variantId);
+      removeFromCart(variantId, variantInfo);
       return;
     }
     setItems((prev) =>
-      prev.map((item) =>
-        item.variantId === variantId
+      prev.map((item) => {
+        const isMatch = variantInfo
+          ? item.variantId === variantId && item.variantInfo === variantInfo
+          : item.variantId === variantId;
+
+        return isMatch
           ? { ...item, quantity: Math.min(quantity, item.stock) }
-          : item
-      )
+          : item;
+      })
     );
   };
 

@@ -49,30 +49,54 @@ export function VariantSelector({
   const [quantity, setQuantity] = useState<number>(1);
   const [addedMessage, setAddedMessage] = useState(false);
 
-  // Find exact matching variant
-  const activeVariant = variants.find((v) => {
+  // Find exact matching variant for selected color and size
+  const exactMatchingVariant = variants.find((v) => {
     const colorMatch = selectedColor ? v.color === selectedColor : true;
     const sizeMatch = selectedSize ? v.size === selectedSize : true;
     return colorMatch && sizeMatch;
-  }) || variants[0];
+  });
+
+  const activeVariant = exactMatchingVariant || variants.find((v) => (selectedColor ? v.color === selectedColor : true)) || variants[0];
 
   const currentPriceCents = activeVariant?.price ?? 0;
   const currentStock = activeVariant?.stock ?? 0;
 
+  // Handle color change and auto-adjust size if needed
+  const handleColorSelect = (color: string) => {
+    setSelectedColor(color);
+    // Check if current selectedSize exists for this new color
+    const sizeExistsForColor = variants.some(
+      (v) => v.color === color && v.size === selectedSize
+    );
+    if (!sizeExistsForColor) {
+      const validSizeVariant = variants.find((v) => v.color === color && v.size);
+      if (validSizeVariant?.size) {
+        setSelectedSize(validSizeVariant.size);
+      }
+    }
+  };
+
   const handleAddToCart = () => {
     if (!activeVariant || currentStock === 0) return;
 
+    // Build specific string representation of selected variant details
+    const colorPart = selectedColor || activeVariant.color;
+    const sizePart = selectedSize || activeVariant.size;
+
     const variantDetailsStr = [
-      activeVariant.color ? `Color: ${activeVariant.color}` : null,
-      activeVariant.size ? `Size: ${activeVariant.size}` : null,
+      colorPart ? `Color: ${colorPart}` : null,
+      sizePart ? `Size: ${sizePart}` : null,
     ]
       .filter(Boolean)
       .join(", ");
 
+    // Ensure variantId uniquely identifies this specific size + color combination
+    const effectiveVariantId = activeVariant.id;
+
     addToCart(
       {
         productId: product.id,
-        variantId: activeVariant.id,
+        variantId: effectiveVariantId,
         name: product.name,
         slug: product.slug,
         variantInfo: variantDetailsStr || "Standard",
@@ -118,8 +142,8 @@ export function VariantSelector({
                 <button
                   key={color}
                   type="button"
-                  onClick={() => setSelectedColor(color)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all ${
+                  onClick={() => handleColorSelect(color)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all cursor-pointer ${
                     isSelected
                       ? "border-primary bg-primary text-primary-foreground shadow-xs"
                       : "border-input bg-background hover:bg-muted text-foreground"
@@ -153,7 +177,7 @@ export function VariantSelector({
                   type="button"
                   onClick={() => setSelectedSize(size)}
                   disabled={isOutOfStock}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all ${
+                  className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all cursor-pointer ${
                     isSelected
                       ? "border-primary bg-primary text-primary-foreground shadow-xs"
                       : isOutOfStock
@@ -178,7 +202,7 @@ export function VariantSelector({
               type="button"
               onClick={() => setQuantity((q) => Math.max(1, q - 1))}
               disabled={quantity <= 1 || currentStock === 0}
-              className="p-2 hover:bg-muted transition-colors rounded-l-lg disabled:opacity-30"
+              className="p-2 hover:bg-muted transition-colors rounded-l-lg disabled:opacity-30 cursor-pointer"
             >
               <Minus className="h-4 w-4" />
             </button>
@@ -187,7 +211,7 @@ export function VariantSelector({
               type="button"
               onClick={() => setQuantity((q) => Math.min(currentStock, q + 1))}
               disabled={quantity >= currentStock || currentStock === 0}
-              className="p-2 hover:bg-muted transition-colors rounded-r-lg disabled:opacity-30"
+              className="p-2 hover:bg-muted transition-colors rounded-r-lg disabled:opacity-30 cursor-pointer"
             >
               <Plus className="h-4 w-4" />
             </button>
@@ -197,7 +221,7 @@ export function VariantSelector({
         <Button
           onClick={handleAddToCart}
           disabled={currentStock === 0}
-          className="w-full h-12 text-base font-bold gap-2"
+          className="w-full h-12 text-base font-bold gap-2 cursor-pointer"
         >
           {addedMessage ? (
             <>

@@ -55,8 +55,8 @@ export function CartDrawer() {
                 <Button onClick={() => setIsCartOpen(false)}>Start Shopping</Button>
               </div>
             ) : (
-              items.map((item) => (
-                <div key={item.variantId} className="py-4 flex gap-4">
+              items.map((item, idx) => (
+                <div key={`${item.variantId}-${item.variantInfo}-${idx}`} className="py-4 flex gap-4">
                   <div className="relative h-20 w-20 rounded-md overflow-hidden bg-muted border shrink-0">
                     <Image
                       src={item.image || "https://images.unsplash.com/photo-1582844245749-6fa6731995cb?auto=format&fit=crop&q=80&w=300"}
@@ -77,28 +77,28 @@ export function CartDrawer() {
                           {item.name}
                         </Link>
                         <button
-                          onClick={() => removeFromCart(item.variantId)}
-                          className="text-muted-foreground hover:text-destructive transition-colors ml-2"
+                          onClick={() => removeFromCart(item.variantId, item.variantInfo)}
+                          className="text-muted-foreground hover:text-destructive transition-colors ml-2 cursor-pointer"
                           title="Remove item"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
-                      <p className="text-xs text-muted-foreground mt-0.5">{item.variantInfo}</p>
+                      <p className="text-xs font-semibold text-primary mt-0.5">{item.variantInfo}</p>
                     </div>
 
                     <div className="flex items-center justify-between mt-2">
                       <div className="flex items-center border rounded-md">
                         <button
-                          onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
-                          className="p-1 hover:bg-muted transition-colors rounded-l-md"
+                          onClick={() => updateQuantity(item.variantId, item.quantity - 1, item.variantInfo)}
+                          className="p-1 hover:bg-muted transition-colors rounded-l-md cursor-pointer"
                         >
                           <Minus className="h-3 w-3" />
                         </button>
                         <span className="px-2.5 text-xs font-semibold">{item.quantity}</span>
                         <button
-                          onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
-                          className="p-1 hover:bg-muted transition-colors rounded-r-md"
+                          onClick={() => updateQuantity(item.variantId, item.quantity + 1, item.variantInfo)}
+                          className="p-1 hover:bg-muted transition-colors rounded-r-md cursor-pointer"
                         >
                           <Plus className="h-3 w-3" />
                         </button>
